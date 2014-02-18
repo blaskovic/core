@@ -1114,6 +1114,60 @@ function relative_modified_date(timestamp) {
 }
 
 /**
+ * Utility functions
+ */
+OC.Util = {
+	/**
+	 * Compare two strings to provide a natural sort
+	 * @param a first string to compare
+	 * @param b second string to compare
+	 * @return -1 if b comes before a, 1 if a comes before b
+	 * or 0 if the strings are identical
+	 */
+	naturalSortCompare: function(a, b) {
+		// Adapted from http://my.opera.com/GreyWyvern/blog/show.dml/1671288
+		function chunkify(t) {
+			var tz = [], x = 0, y = -1, n = 0, code, c;
+
+			while (x < t.length) {
+				c = t.charAt(x);
+				var m = (c === '.' || (c >= '0' && c <= '9'));
+				if (m !== n) {
+					// next chunk
+					y++;
+					tz[y] = '';
+					n = m;
+				}
+				tz[y] += c;
+				x++;
+			}
+			return tz;
+		}
+
+		var aa = chunkify(a);
+		var bb = chunkify(b);
+
+		for (x = 0; aa[x] && bb[x]; x++) {
+			if (aa[x] !== bb[x]) {
+				var aNum = Number(aa[x]), bNum = Number(bb[x]);
+				// note: == is correct here
+				if (aNum == aa[x] && bNum == bb[x]) {
+					return aNum - bNum;
+				} else {
+					// Forcing 'en' locale to match the server-side locale which is
+					// always 'en'.
+					//
+					// Note: This setting isn't supported by all browsers but for the ones
+					// that do there will be more consistency between client-server sorting
+					return aa[x].localeCompare(bb[x], 'en');
+				}
+			}
+		}
+		return aa.length - bb.length;
+	},
+}
+
+/**
  * get a variable by name
  * @param string name
  */

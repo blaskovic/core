@@ -11,16 +11,6 @@ if ($appConfig->getValue('core', 'shareapi_allow_links', 'yes') !== 'yes') {
 	exit();
 }
 
-function fileCmp($a, $b) {
-	if ($a['type'] == 'dir' and $b['type'] != 'dir') {
-		return -1;
-	} elseif ($a['type'] != 'dir' and $b['type'] == 'dir') {
-		return 1;
-	} else {
-		return strnatcasecmp($a['name'], $b['name']);
-	}
-}
-
 function determineIcon($file, $sharingRoot, $sharingToken) {
 	// for folders we simply reuse the files logic
 	if($file['type'] == 'dir') {
@@ -194,7 +184,7 @@ if (isset($path)) {
 				$i['icon'] = determineIcon($i, $basePath, $token);
 				$files[] = $i;
 			}
-			usort($files, "fileCmp");
+			usort($files, array('\OCA\Files\Helper', 'fileCmp'));
 
 			// Make breadcrumb
 			$breadcrumb = array();

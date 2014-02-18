@@ -357,15 +357,16 @@ window.FileList={
 	insertElement:function(name, type, element) {
 		//find the correct spot to insert the file or folder
 		var pos, fileElements=$('tr[data-file][data-type="'+type+'"]:visible');
-		if (name.localeCompare($(fileElements[0]).attr('data-file')) < 0) {
+		if (!fileElements.length) {
+			$('#fileList').append(element);
+		} else if (OC.Util.naturalSortCompare(name, $(fileElements[0]).attr('data-file')) < 0) {
 			pos = -1;
-		} else if (name.localeCompare($(fileElements[fileElements.length-1]).attr('data-file')) > 0) {
+		} else if (OC.Util.naturalSortCompare(name, $(fileElements[fileElements.length-1]).attr('data-file')) > 0) {
 			pos = fileElements.length - 1;
 		} else {
 			for(pos = 0; pos<fileElements.length-1; pos++) {
-				if (name.localeCompare($(fileElements[pos]).attr('data-file')) > 0
-					&& name.localeCompare($(fileElements[pos+1]).attr('data-file')) < 0)
-				{
+				if (OC.Util.naturalSortCompare(name, $(fileElements[pos]).attr('data-file')) > 0
+					&& OC.Util.naturalSortCompare(name, $(fileElements[pos+1]).attr('data-file')) < 0) {
 					break;
 				}
 			}

@@ -17,7 +17,7 @@
 	"globals": {
 		"console": true,
 		"it": true,
-		"itx": true,
+		"xit": true,
 		"expect": true,
 		"describe": true,
 		"beforeEach": true,
