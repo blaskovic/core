@@ -20,7 +20,7 @@ class Test_NaturalSort extends PHPUnit_Framework_TestCase {
 	 */
 	public function testNaturalSortCompare($array, $sorted)
 	{
-		$comparator = OC_NaturalSort::getInstance();
+		$comparator = \OC\NaturalSort::getInstance();
 		usort($array, array($comparator, 'compare'));
 		$this->assertEquals($sorted, $array);
 	}

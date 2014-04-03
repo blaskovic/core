@@ -510,6 +510,6 @@ class Util {
 	 * or 0 if the strings are identical
 	 */
 	public static function naturalSortCompare($a, $b) {
-		return \OC_NaturalSort::getInstance()->compare($a, $b);
+		return \OC\NaturalSort::getInstance()->compare($a, $b);
 	}
 }

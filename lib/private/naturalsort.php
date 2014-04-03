@@ -7,7 +7,9 @@
  *
  */
 
-class OC_NaturalSort_DefaultCollator {
+namespace OC;
+
+class NaturalSort_DefaultCollator {
 
 	public function compare($a, $b) {
 		if ($a === $b) {
@@ -17,7 +19,7 @@ class OC_NaturalSort_DefaultCollator {
 	}
 }
 
-class OC_NaturalSort {
+class NaturalSort {
 	private static $instance;
 	private $collator;
 
@@ -59,10 +61,10 @@ class OC_NaturalSort {
 			// looks like the default is en_US_POSIX which yields wrong sorting with
 			// German umlauts, so using en_US instead
 			if (class_exists('Collator')) {
-				$this->collator = new Collator('en_US');
+				$this->collator = new \Collator('en_US');
 			}
 			else {
-				$this->collator = new OC_NaturalSort_DefaultCollator();
+				$this->collator = new \OC\NaturalSort_DefaultCollator();
 			}
 		}
 		return $this->collator;
@@ -102,11 +104,11 @@ class OC_NaturalSort {
 
 	/**
 	 * Returns a singleton
-	 * @return \OC_NaturalSort instance
+	 * @return \OC\NaturalSort instance
 	 */
 	public static function getInstance() {
 		if (!isset(self::$instance)) {
-			self::$instance = new OC_NaturalSort();
+			self::$instance = new \OC\NaturalSort();
 		}
 		return self::$instance;
 	}
