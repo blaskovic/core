@@ -71,6 +71,32 @@ class Helper
 	}
 
 	/**
+	 * Comparator function to sort files by date
+	 *
+	 * @param \OCP\Files\FileInfo $a file
+	 * @param \OCP\Files\FileInfo $b file
+	 * @return int -1 if $a must come before $b, 1 otherwise
+	 */
+	public static function mtimeCmp($a, $b) {
+		$aTime = $a->getMTime();
+		$bTime = $b->getMTime();
+		return $bTime - $aTime;
+	}
+
+	/**
+	 * Comparator function to sort files by size
+	 *
+	 * @param \OCP\Files\FileInfo $a file
+	 * @param \OCP\Files\FileInfo $b file
+	 * @return int -1 if $a must come before $b, 1 otherwise
+	 */
+	public static function sizeCmp($a, $b) {
+		$aSize = $a->getSize();
+		$bSize = $b->getSize();
+		return $bSize - $aSize;
+	}
+
+	/**
 	 * Formats the file info to be returned as JSON to the client.
 	 *
 	 * @param \OCP\Files\FileInfo file info
@@ -117,12 +143,23 @@ class Helper
 	 * returns it as a sorted array of FileInfo.
 	 *
 	 * @param string $dir path to the directory
+	 * @param string $sortAttribute attribute to sort on
+	 * @param bool $sortDescending true for descending sort, false otherwise
 	 * @return \OCP\Files\FileInfo[] files
 	 */
-	public static function getFiles($dir) {
+	public static function getFiles($dir, $sortAttribute = 'name', $sortDescending = false) {
 		$content = \OC\Files\Filesystem::getDirectoryContent($dir);
 
-		usort($content, array('\OCA\Files\Helper', 'fileCmp'));
+		$sortFunc = 'fileCmp';
+		if ($sortAttribute === 'mtime') {
+			$sortFunc = 'mtimeCmp';
+		} else if ($sortAttribute === 'size') {
+			$sortFunc = 'sizeCmp';
+		}
+		usort($content, array('\OCA\Files\Helper', $sortFunc));
+		if ($sortDescending) {
+			$content = array_reverse($content);
+		}
 		return $content;
 	}
 }

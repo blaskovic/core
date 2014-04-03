@@ -20,6 +20,35 @@ window.FileList = {
 	initialized: false,
 
 	/**
+	 * Sort attribute
+	 */
+	_sort: 'name',
+
+	/**
+	 * Sort direction: 'asc' or 'desc'
+	 */
+	_sortDirection: 'asc',
+
+	_sortComparators: {
+		name: function($fileA, $fileB) {
+			// TODO: folders first
+			var a = $fileA.attr('data-file');
+			var b = $fileB.attr('data-file');
+			return b.localeCompare(a);
+		},
+		size: function($fileA, $fileB) {
+			var a = parseFloat($fileA.attr('data-size'), 10);
+			var b = parseFloat($fileB.attr('data-size'), 10);
+			return b - a;
+		},
+		mtime: function($fileA, $fileB) {
+			var a = parseInt($fileA.attr('data-mtime'), 10);
+			var b = parseInt($fileB.attr('data-mtime'), 10);
+			return b - a;
+		}
+	},
+
+	/**
 	 * Initialize the file list and its components
 	 */
 	initialize: function() {
@@ -42,11 +71,33 @@ window.FileList = {
 
 		$('#controls').prepend(this.breadcrumb.$el);
 
+		this.$el.find('thead th').click(this._onClickHeader);
+
 		$(window).resize(function() {
 			// TODO: debounce this ?
 			var width = $(this).width();
 			FileList.breadcrumb.resize(width, false);
 		});
+	},
+
+	/**
+	 * Event handler when clicking on a table header
+	 */
+	_onClickHeader: function(e) {
+		var $target = $(e.target);
+		var sort;
+		if (!$target.is('th')) {
+			$target = $target.closest('th');
+		}
+		sort = $target.attr('data-sort');
+		if (sort) {
+			if (FileList._sort === sort) {
+				FileList.setSort(sort, (FileList._sortDirection === 'desc')?'asc':'desc');
+			}
+			else {
+				FileList.setSort(sort, 'asc');
+			}
+		}
 	},
 
 	/**
@@ -432,6 +483,18 @@ window.FileList = {
 		this.breadcrumb.setDirectory(this.getCurrentDirectory());
 	},
 	/**
+	 * Sets the current sorting and refreshes the list
+	 *
+	 * @param sort sort attribute name
+	 * @param direction sort direction, one of "asc" or "desc"
+	 */
+	setSort: function(sort, direction) {
+		this._sort = sort;
+		this._sortDirection = (direction === 'desc')?'desc':'asc';
+		this._sortComparator = this._sortComparators[sort] || this._sortComparators['name'];
+		this.reload();
+	},
+	/**
 	 * @brief Reloads the file list using ajax call
 	 */
 	reload: function() {
@@ -442,7 +505,9 @@ window.FileList = {
 		FileList._reloadCall = $.ajax({
 			url: Files.getAjaxUrl('list'),
 			data: {
-				dir : $('#dir').val()
+				dir: $('#dir').val(),
+				sort: FileList._sort,
+				sortdirection: FileList._sortDirection
 			},
 			error: function(result) {
 				FileList.reloadCallback(result);
@@ -547,6 +612,7 @@ window.FileList = {
 		// find the correct spot to insert the file or folder
 		var pos,
 			fileElements = this.$fileList.find('tr[data-file][data-type="'+type+'"]:not(.hidden)');
+		// TODO: use comparator
 		if (name.localeCompare($(fileElements[0]).attr('data-file')) < 0) {
 			pos = -1;
 		} else if (name.localeCompare($(fileElements[fileElements.length-1]).attr('data-file')) > 0) {

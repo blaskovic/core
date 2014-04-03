@@ -60,7 +60,7 @@
 <table id="filestable" data-allow-public-upload="<?php p($_['publicUploadEnabled'])?>" data-preview-x="36" data-preview-y="36">
 	<thead>
 		<tr>
-			<th class="hidden" id='headerName'>
+			<th class="hidden" id='headerName' data-sort="name">
 				<div id="headerName-container">
 					<input type="checkbox" id="select_all" />
 					<label for="select_all"></label>
@@ -76,8 +76,8 @@
 					</span>
 				</div>
 			</th>
-			<th class="hidden" id="headerSize"><?php p($l->t('Size')); ?></th>
-			<th class="hidden" id="headerDate">
+			<th class="hidden" id="headerSize" data-sort="size"><?php p($l->t('Size')); ?></th>
+			<th class="hidden" id="headerDate" data-sort="mtime">
 				<span id="modified"><?php p($l->t( 'Modified' )); ?></span>
 				<?php if ($_['permissions'] & OCP\PERMISSION_DELETE): ?>
 					<span class="selectedActions"><a href="" class="delete-selected">
