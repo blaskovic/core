@@ -30,11 +30,13 @@ class Shared extends \OC\Files\Storage\Common {
 
 	private $mountPoint;   // mount point relative to data/user/files
 	private $type;         // can be "file" or "folder"
+	private $shareId;      // share Id to identify the share in the database
 	private $files = array();
 
 	public function __construct($arguments) {
 		$this->mountPoint = $arguments['shareTarget'];
 		$this->type = $arguments['shareType'];
+		$this->shareId = $arguments['shareId'];
 	}
 
 	public function getId() {
@@ -289,7 +291,52 @@ class Shared extends \OC\Files\Storage\Common {
 		return false;
 	}
 
+	/**
+	 * @brief rename a shared foder/file
+	 * @param string $sourcePath
+	 * @param string $targetPath
+	 * @return bool
+	 */
+	private function renameMountPoint($sourcePath, $targetPath) {
+
+		// rename mount point
+		$query = \OC_DB::prepare(
+				'Update `*PREFIX*share`
+					SET `file_target` = ?
+					WHERE `id` = ?'
+				);
+
+		$result = $query->execute(array($targetPath, $this->shareId));
+
+		if ($result) {
+			// update the mount manager with the new paths
+			$mountManager = \OC\Files\Filesystem::getMountManager();
+			$mount = $mountManager->find(\OCP\User::getUser() . '/files' . $sourcePath);
+			$mount->setMountPoint('/' . \OCP\User::getUser() . '/files' . $targetPath . '/');
+			$mountManager->addMount($mount);
+			$mountManager->removeMount('/' . \OCP\User::getUser() . '/files' . $sourcePath . '/');
+
+		} else {
+			\OCP\Util::writeLog('file sharing',
+					'Could not rename mount point for shared folder "' . $sourcePath . '" to "' . $targetPath . '"',
+					\OCP\Util::ERROR);
+		}
+
+		return $result;
+	}
+
+
 	public function rename($path1, $path2) {
+
+		$absolutePath1 = '/' . \OCP\User::getUser() . '/files' . $path1;
+		$sourceMountPoint = \OC\Files\Filesystem::getMountPoint($absolutePath1);
+
+		// if we renamed the mount point we need to adjust the file_target in the
+		// database
+		if (strlen($sourceMountPoint) >= strlen($absolutePath1)) {
+			return $this->renameMountPoint($path1, $path2);
+		}
+
 		// Renaming/moving is only allowed within shared folders
 		$pos1 = strpos($path1, '/', 1);
 		$pos2 = strpos($path2, '/', 1);
@@ -405,6 +452,7 @@ class Shared extends \OC\Files\Storage\Common {
 						array(
 							'shareTarget' => $share['file_target'],
 							'shareType' => $share['item_type'],
+							'shareId' => $share['id'],
 							),
 						$options['user_dir'] . '/' . $share['file_target']);
 			}
