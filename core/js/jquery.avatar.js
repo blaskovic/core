@@ -77,7 +77,7 @@
 
 		var url = OC.generateUrl(
 			'/avatar/{user}/{size}?requesttoken={requesttoken}',
-			{user: user, size: size, requesttoken: oc_requesttoken}
+			{user: user, size: size * window.devicePixelRatio, requesttoken: oc_requesttoken}
 		);
 
 		$.get(url, function(result) {
@@ -94,10 +94,16 @@
 			} else {
 				$div.show();
 				if (ie8fix === true) {
+<<<<<<< HEAD
 					var randomNumber = Math.floor(Math.random()*1000);
 					$div.html('<img src="' + url + '#' + randomNumber + '">');
 				} else {
 					$div.html('<img src="' + url + '">');
+=======
+					$div.html('<img width="' + size + '" height="' + size + '" src="'+url+'#'+Math.floor(Math.random()*1000)+'">');
+				} else {
+					$div.html('<img width="' + size + '" height="' + size + '" src="'+url+'">');
+>>>>>>> be9bc2c727e59ced01f86bc1781ac586f92bc29f
 				}
 			}
 			if(typeof callback === 'function') {

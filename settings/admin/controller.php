@@ -106,8 +106,8 @@ class Controller {
 	/**
 	 * Get the field name to use it in error messages
 	 *
-	 * @param $setting string
-	 * @param $l \OC_L10N
+	 * @param string $setting
+	 * @param \OC_L10N $l
 	 * @return string
 	 */
 	public static function getFieldname($setting, $l) {
@@ -117,7 +117,7 @@ class Controller {
 			case 'mail_smtpsecure':
 				return $l->t( 'Encryption' );
 			case 'mail_smtpauthtype':
-				return $l->t( 'Authentification method' );
+				return $l->t( 'Authentication method' );
 		}
 	}
 }
